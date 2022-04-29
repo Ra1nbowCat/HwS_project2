@@ -42,6 +42,8 @@ class ViewController: UIViewController {
         
         title = countries[correctAnswer].uppercased()
         title! += " | Your score now is: \(counter)"
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(showScore))
     }
     
     @IBAction func buttonTapped(_ sender: UIButton) {
@@ -67,5 +69,17 @@ class ViewController: UIViewController {
         }
     }
     
+    @objc func showScore() {
+        let ac = UIAlertController(title: "This is your score!", message: "Your score is: \(counter)", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok, let's play!", style: .default))
+        ac.addAction(UIAlertAction(title: "Clear my score!", style: .default, handler: clearScore))
+        present(ac, animated: true)
+    }
+    
+    @objc func clearScore(action: UIAlertAction! = nil) {
+        counter = 0
+        title = countries[correctAnswer].uppercased()
+        title! += " | Your score now is: \(counter)"
+    }
 }
 
