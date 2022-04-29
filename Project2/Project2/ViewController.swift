@@ -41,6 +41,7 @@ class ViewController: UIViewController {
         button3.imageView?.layer.borderColor = UIColor.lightGray.cgColor
         
         title = countries[correctAnswer].uppercased()
+        title! += " | Your score now is: \(counter)"
     }
     
     @IBAction func buttonTapped(_ sender: UIButton) {
@@ -50,13 +51,20 @@ class ViewController: UIViewController {
             title = "Correct"
             counter += 1
         } else {
-            title = "Wrong"
+            title = "Wrong. It's \(countries[sender.tag].uppercased())"
             counter -= 1
         }
         
-        let ac = UIAlertController(title: title, message: "Your score is: \(counter)", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "Continue", style: .default, handler: askQuestion))
-        present(ac, animated: true)
+        if counter < 10 {
+            let ac = UIAlertController(title: title, message: "Your score is: \(counter)", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Continue", style: .default, handler: askQuestion))
+            present(ac, animated: true)
+        } else {
+            let ac2 = UIAlertController(title: title, message: "Congratulations! You won!", preferredStyle: .alert)
+            ac2.addAction(UIAlertAction(title: "New game", style: .default, handler: askQuestion))
+            counter = 0
+            present(ac2, animated: true)
+        }
     }
     
 }
