@@ -15,13 +15,36 @@ class ViewController: UIViewController {
     var countries = [String]()
     var counter = 0
     var correctAnswer = 0
+    var finalCounter = 0
+    var scoreToBeat = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
         countries += ["estonia", "france", "germany", "ireland", "italy", "monaco", "nigeria", "poland", "russia", "spain", "us", "uk"]
         
+        let defaults = UserDefaults.standard
+        
+        if let savedCounter = defaults.object(forKey: "counter") as? Data {
+            let jsonDecoder = JSONDecoder()
+            
+            do {
+                finalCounter = try jsonDecoder.decode(Int.self, from: savedCounter)
+            } catch {
+                print("Error in decoding")
+            }
+        }
+        
         askQuestion()
+        
+        let ac3 = UIAlertController(title: "Your previous score is: \(finalCounter). Can you beat this?", message: nil, preferredStyle: .alert)
+        ac3.addAction(UIAlertAction(title: "Continue", style: .default))
+        present(ac3, animated: true)
+        print(finalCounter)
+        scoreToBeat = finalCounter
+        finalCounter = 0
     }
+    
+    
 
     func askQuestion(action: UIAlertAction! = nil) {
         countries.shuffle()
@@ -52,12 +75,20 @@ class ViewController: UIViewController {
         if sender.tag == correctAnswer {
             title = "Correct"
             counter += 1
+            finalCounter = counter
+            save()
         } else {
             title = "Wrong. It's \(countries[sender.tag].uppercased())"
             counter -= 1
+            finalCounter = counter
+            save()
         }
         
-        if counter < 10 {
+        if counter == scoreToBeat + 1 {
+            let ac4 = UIAlertController(title: "Wow! You've beaten your previous score!", message: "Your score is: \(counter)", preferredStyle: .alert)
+            ac4.addAction(UIAlertAction(title: "Continue", style: .default, handler: askQuestion))
+            present(ac4, animated: true)
+        } else if counter < 10 {
             let ac = UIAlertController(title: title, message: "Your score is: \(counter)", preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "Continue", style: .default, handler: askQuestion))
             present(ac, animated: true)
@@ -65,6 +96,8 @@ class ViewController: UIViewController {
             let ac2 = UIAlertController(title: title, message: "Congratulations! You won!", preferredStyle: .alert)
             ac2.addAction(UIAlertAction(title: "New game", style: .default, handler: askQuestion))
             counter = 0
+            finalCounter = counter
+            save()
             present(ac2, animated: true)
         }
     }
@@ -80,6 +113,17 @@ class ViewController: UIViewController {
         counter = 0
         title = countries[correctAnswer].uppercased()
         title! += " | Your score now is: \(counter)"
+    }
+    
+    func save() {
+        let jsonEncoder = JSONEncoder()
+        
+        if let savedData = try? jsonEncoder.encode(finalCounter) {
+            let defaults = UserDefaults.standard
+            defaults.set(savedData, forKey: "counter")
+        } else {
+            print("Failed to encode")
+        }
     }
 }
 
